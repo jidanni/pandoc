@@ -1094,8 +1094,11 @@ inlineToLaTeX (Image attr@(_,_,kvs) _ (source, _)) = do
   inHeading <- gets stInHeading
   return $
     (if inHeading then "\\protect" else "") <>
-      (if isSVG then "\\includesvg" else "\\includegraphics") <>
-    options <> braces (literal source'')
+    (case dimension Width attr `mplus` dimension Height attr of
+       Just _ -> id
+       Nothing -> ("\\pandocbounded" <>) . braces)
+      ((if isSVG then "\\includesvg" else "\\includegraphics") <>
+        options <> braces (literal source''))
 inlineToLaTeX (Note contents) = do
   setEmptyLine False
   externalNotes <- gets stExternalNotes
